@@ -1,5 +1,11 @@
-#map-container{
-    width: 1280px;
-    height: 720px;
-    margin: auto;
+#map-container {
+	width: 1280px;
+	height: 720px;
+	margin: auto;
+	padding: 2rem;
+	text-align: center;
+}
+#general-container {
+	margin-left: auto;
+	margin-right: auto;
 }
