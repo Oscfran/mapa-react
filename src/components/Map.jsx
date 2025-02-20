@@ -20,25 +20,39 @@ let map;
 
 async function initMap() {
   // The location of Uluru
-  const position = { lat: -25.344, lng: 131.031 };
-  // Request needed libraries.
-  //@ts-ignore
-  const { Map } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        // Request needed libraries.
+        //@ts-ignore
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-  // The map, centered at Uluru
-  map = new Map(document.getElementById("map-container"), {
-    zoom: 4,
-    center: position,
-    mapId: "app",
-  });
+        // The map, centered at Uluru
+        map = new Map(document.getElementById("map-container"), {
+          zoom: 10,
+          center: pos,
+          mapId: "app",
+        });
 
-  // The marker, positioned at Uluru
-  const marker = new AdvancedMarkerElement({
-    map: map,
-    position: position,
-    title: "Uluru",
-  });
+        // The marker, positioned at Uluru
+        const marker = new AdvancedMarkerElement({
+          map: map,
+          position: pos,
+          title: "Uluru",
+        });
+      }
+    )}
+     else {
+      // Browser doesn't support Geolocation
+      console.log("nop");
+    }
+  
+  
 }
 
 initMap();
