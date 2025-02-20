@@ -1,9 +1,14 @@
 import { useEffect } from "react";
+import { useState } from "react";
 import "./map.css";
 
 const API = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const MapApi = () => {
+	const [map, setMap] = useState("");
+	const [name, setName] = useState("");
+	const [latitude, setLatitude] = useState("");
+	const [longitude, setLongitude] = useState("");
 	useEffect(() => {
 		// Initialize and add the map
 		((g) => {
@@ -64,31 +69,80 @@ const MapApi = () => {
 						await google.maps.importLibrary("marker");
 
 					// The map starts at Current location
-					map = new Map(document.getElementById("map-container"), {
-						zoom: 10,
-						center: pos,
-						mapId: "app",
-					});
 
-					// The marker, positioned at Uluru
-					const marker = new AdvancedMarkerElement({
+					setMap(
+						new Map(document.getElementById("map-container"), {
+							zoom: 10,
+							center: pos,
+							mapId: "app",
+						}),
+					);
+
+					// The marker, positioned at actual location
+					new AdvancedMarkerElement({
 						map: map,
 						position: pos,
-						title: "Uluru",
+						title: "Local",
 					});
 				});
 			} else {
 				// Browser doesn't support Geolocation
-				console.log("nop");
+				alert("Browser doesn't support Geolocation!!!");
 			}
 		}
 
 		initMap();
 	}, []);
 
+	
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		if (name && latitude && longitude) {
+			console.log(name, latitude, longitude);
+			const pos = {
+				lat: Number.parseFloat(latitude),
+				lng: Number.parseFloat(longitude),
+			};
+			const { AdvancedMarkerElement } =
+				await google.maps.importLibrary("marker");
+			new AdvancedMarkerElement({
+				map: map,
+				position: pos,
+				title: name,
+			});
+		} else {
+			alert("All inputs must be filled");
+		}
+	};
+
 	return (
 		<div id="general-container">
 			Welcome to my map,
+			<form onSubmit={handleSubmit}>
+				<input
+					onChange={(e) => setName(e.target.value)}
+					type={"text"}
+					placeholder={"Enter Place Name"}
+				/>
+				<input
+					onChange={(e) => setLatitude(e.target.value)}
+					type="number"
+					step="0.001"
+					min="-90"
+					max="90"
+					placeholder={"Enter latitude"}
+				/>
+				<input
+					onChange={(e) => setLongitude(e.target.value)}
+					type="number"
+					step="0.001"
+					min="-90"
+					max="90"
+					placeholder={"Enter your longitude"}
+				/>
+				<button type="submit">Click to Proceed</button>
+			</form>
 			<div id="map-container" />
 		</div>
 	);
