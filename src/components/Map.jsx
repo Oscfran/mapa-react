@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./map.css";
 
 const API = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+let markers = [];
 
 const MapApi = () => {
 	const [map, setMap] = useState("");
@@ -12,15 +13,15 @@ const MapApi = () => {
 	useEffect(() => {
 		// Initialize and add the map
 		((g) => {
-			let h,
-				a,
-				k,
-				p = "The Google Maps JavaScript API",
-				c = "google",
-				l = "importLibrary",
-				q = "__ib__",
-				m = document,
-				b = window;
+			let h;
+			let a;
+			let k;
+			let p = "The Google Maps JavaScript API";
+			let c = "google";
+			let l = "importLibrary";
+			let q = "__ib__";
+			let m = document;
+			let b = window;
 			b = b[c] || (b[c] = {});
 			const d = b.maps || (b.maps = {}),
 				r = new Set(),
