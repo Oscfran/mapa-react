@@ -3,24 +3,25 @@ import { useState } from "react";
 import "./map.css";
 
 const API = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-let markers = [];
+const nextId = 0;
 
 const MapApi = () => {
 	const [map, setMap] = useState("");
 	const [name, setName] = useState("");
 	const [latitude, setLatitude] = useState("");
 	const [longitude, setLongitude] = useState("");
+	const [markers, setMarkers] = useState([]);
 	useEffect(() => {
 		// Initialize and add the map
 		((g) => {
 			let h;
 			let a;
 			let k;
-			let p = "The Google Maps JavaScript API";
-			let c = "google";
-			let l = "importLibrary";
-			let q = "__ib__";
-			let m = document;
+			const p = "The Google Maps JavaScript API";
+			const c = "google";
+			const l = "importLibrary";
+			const q = "__ib__";
+			const m = document;
 			let b = window;
 			b = b[c] || (b[c] = {});
 			const d = b.maps || (b.maps = {}),
@@ -56,58 +57,39 @@ const MapApi = () => {
 		let map;
 
 		async function initMap() {
-			// The location of Uluru
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(async (position) => {
-					const pos = {
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					};
-					// Request needed libraries.
-					//@ts-ignore
-					const { Map } = await google.maps.importLibrary("maps");
-					const { AdvancedMarkerElement } =
-						await google.maps.importLibrary("marker");
+			// The location actual location
+			const pos = {
+				lat: 9.8990415,
+				lng: -84.1556396,
+			};
+			// Request needed libraries.
+			//@ts-ignore
+			const { Map } = await google.maps.importLibrary("maps");
 
-					// The map starts at Current location
-
-					setMap(
-						new Map(document.getElementById("map-container"), {
-							zoom: 10,
-							center: pos,
-							mapId: "app",
-						}),
-					);
-
-					// The marker, positioned at actual location
-					new AdvancedMarkerElement({
-						map: map,
-						position: pos,
-						title: "Local",
-					});
-				});
-			} else {
-				// Browser doesn't support Geolocation
-				alert("Browser doesn't support Geolocation!!!");
-			}
+			// The map starts at Current location
+			setMap(
+				new Map(document.getElementById("map-container"), {
+					zoom: 8,
+					center: pos,
+					mapId: "app",
+				}),
+			);
 		}
 
 		initMap();
 	}, []);
 
-	
-
-	const handleSubmit = async (e) => {
+	const handleSubmitSetMarker = async (e) => {
 		e.preventDefault();
 		if (name && latitude && longitude) {
-			console.log(name, latitude, longitude);
 			const pos = {
 				lat: Number.parseFloat(latitude),
 				lng: Number.parseFloat(longitude),
 			};
 			const { AdvancedMarkerElement } =
 				await google.maps.importLibrary("marker");
-			new AdvancedMarkerElement({
+
+			const marker = new AdvancedMarkerElement({
 				map: map,
 				position: pos,
 				title: name,
@@ -116,11 +98,35 @@ const MapApi = () => {
 			alert("All inputs must be filled");
 		}
 	};
+	const handleClickWhereAmI = async (e) => {
+		e.preventDefault();
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(async (position) => {
+				const pos = {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				};
+				map.panTo(pos);
+				map.setZoom(14);
+				const { AdvancedMarkerElement } =
+					await google.maps.importLibrary("marker");
+				new AdvancedMarkerElement({
+					map: map,
+					position: pos,
+					title: name,
+				});
+			});
+		} else {
+			// Browser doesn't support Geolocation
+			alert("Browser doesn't support Geolocation!!!");
+		}
+	};
 
 	return (
 		<div id="general-container">
+			<title>My map!!! </title>
 			Welcome to my map,
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmitSetMarker}>
 				<input
 					onChange={(e) => setName(e.target.value)}
 					type={"text"}
@@ -144,6 +150,9 @@ const MapApi = () => {
 				/>
 				<button type="submit">Click to Proceed</button>
 			</form>
+			<button type="button" onClick={handleClickWhereAmI}>
+				Where am i?
+			</button>
 			<div id="map-container" />
 		</div>
 	);
