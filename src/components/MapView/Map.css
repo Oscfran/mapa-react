@@ -39,3 +39,7 @@ input[type="number"] {
 	margin: 8px 10px;
 	box-sizing: border-box;
 }
+
+.infoWindow-text{
+	color: #000000;
+}
