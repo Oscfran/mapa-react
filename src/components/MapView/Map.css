@@ -6,9 +6,25 @@
 	display: flex;
 	justify-content: center;
 }
+
+#marker-list {
+	width: 250px;
+	height: 720px;
+	margin: 10px 10px;
+	text-align: center;
+	justify-content: center;
+}
 #general-container {
 	margin: auto;
 	justify-content: center;
+}
+#map-list {
+	margin: 10px 10px;
+	display: flex;
+}
+#list-element {
+	margin: 10px 10px;
+	padding: 10px 10px;
 }
 input[type="text"] {
 	width: 25%;

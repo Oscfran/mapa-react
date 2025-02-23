@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import useDocumentTitle from "../Hooks/useDocumentTitle.jsx";
 import "./map.css";
 
 const API = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const nextId = 0;
 
 const MapApi = () => {
-	const [map, setMap] = useState("");
+	const [map, setMap] = useState();
 	const [name, setName] = useState("");
+	const [nextId, setNextId] = useState(0);
+	const [pageTitle, setPageTitle] = useState("My map!!!");
 	const [latitude, setLatitude] = useState("");
 	const [longitude, setLongitude] = useState("");
+	const [isLoading, setLoading] = useState(false);
 	const [markers, setMarkers] = useState([]);
 	useEffect(() => {
 		// Initialize and add the map
@@ -54,8 +57,6 @@ const MapApi = () => {
 			// Add other bootstrap parameters as needed, using camel case.
 		});
 
-		let map;
-
 		async function initMap() {
 			// The location actual location
 			const pos = {
@@ -79,6 +80,21 @@ const MapApi = () => {
 		initMap();
 	}, []);
 
+	const getLocationName = async (lat, lng) => {
+		const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API}`;
+		try{
+			const response = await fetch(url);
+			const data = await response.json();
+			if (data.results.length > 0){
+				return data.results[0].formatted_address;
+			}
+			return "Unknown location"
+		} catch (error) {
+			console.error("Error getting places name", error);
+			return "Error getting places name"
+		}
+	};
+
 	const handleSubmitSetMarker = async (e) => {
 		e.preventDefault();
 		if (name && latitude && longitude) {
@@ -93,15 +109,31 @@ const MapApi = () => {
 				map: map,
 				position: pos,
 				title: name,
+				id:nextId
 			});
+			setNextId(nextId + 1);
+			setMarkers([...markers, marker]);
+			const placeName = await getLocationName(latitude,longitude);
+			setPageTitle(placeName);
+			map.panTo(pos);
+			map.setZoom(14);
 		} else {
 			alert("All inputs must be filled");
 		}
 	};
+
+	const handleRemove = async (item) => {
+		setMarkers((markers) => {
+			return markers.filter((marker) => marker !== item);
+		});
+		item.setMap(null);
+	};
+
 	const handleClickWhereAmI = async (e) => {
 		e.preventDefault();
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(async (position) => {
+				setLoading(true);
 				const pos = {
 					lat: position.coords.latitude,
 					lng: position.coords.longitude,
@@ -115,6 +147,7 @@ const MapApi = () => {
 					position: pos,
 					title: name,
 				});
+				setLoading(false);
 			});
 		} else {
 			// Browser doesn't support Geolocation
@@ -122,9 +155,11 @@ const MapApi = () => {
 		}
 	};
 
+	useDocumentTitle(pageTitle);
+
 	return (
 		<div id="general-container">
-			<title>My map!!! </title>
+			<title> {pageTitle} </title>
 			Welcome to my map,
 			<form onSubmit={handleSubmitSetMarker}>
 				<input
@@ -135,7 +170,7 @@ const MapApi = () => {
 				<input
 					onChange={(e) => setLatitude(e.target.value)}
 					type="number"
-					step="0.001"
+					step="0.0000001"
 					min="-90"
 					max="90"
 					placeholder={"Enter latitude"}
@@ -143,17 +178,32 @@ const MapApi = () => {
 				<input
 					onChange={(e) => setLongitude(e.target.value)}
 					type="number"
-					step="0.001"
+					step="0.0000001"
 					min="-90"
 					max="90"
 					placeholder={"Enter your longitude"}
 				/>
 				<button type="submit">Click to Proceed</button>
 			</form>
-			<button type="button" onClick={handleClickWhereAmI}>
-				Where am i?
+			<button type="button" disabled={isLoading} onClick={handleClickWhereAmI}>
+				{isLoading ? "Loading..." : "Where am i?"}
 			</button>
-			<div id="map-container" />
+			<div id="map-list">
+				<div id="map-container" />
+				<div id="marker-list">
+					<h2>List of markers</h2>
+					{markers.length <= 0
+						? "You dont have markers yet"
+						: markers.map((item) => (
+								<li key={item.id}>
+									<span id="list-element">{item.title}</span>
+									<button type="button" onClick={() => handleRemove(item)}>
+										Remove
+									</button>
+								</li>
+							))}
+				</div>
+			</div>
 		</div>
 	);
 };
