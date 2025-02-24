@@ -4,7 +4,7 @@ import "../Styles/Layout.css"
 const Index = () => {
     return (
         <>
-            <header class="container">
+            <header class>
                 <nav class="navbar">
                     <ul class="navlist">
                         <li class="item"><Link to="/">Home</Link></li>
