@@ -205,6 +205,10 @@ const MapApi = () => {
 					lat: position.coords.latitude,
 					lng: position.coords.longitude,
 				};
+				setStoredLocation({
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				});
 				map.panTo(pos);
 				map.setZoom(14);
 				const { AdvancedMarkerElement } =
