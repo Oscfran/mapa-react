@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 function useDocumentTitle(title) {
 	useEffect(() => {
-        console.log(title);
+		console.log(title);
 		document.title = title;
 	}, [title]); //executes only when title changes
 }

@@ -1,27 +1,32 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import useDocumentTitle from "../Hooks/useDocumentTitle.jsx";
-import useQueryParameters from "../Hooks/useQueryParameters.jsx";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import useClipboard from "../Hooks/useClipboard.jsx";
+import useDocumentTitle from "../Hooks/useDocumentTitle.jsx";
 import useLocalStorage from "../Hooks/useLocalStorage.jsx";
+import useQueryParameters from "../Hooks/useQueryParameters.jsx";
 import "./map.css";
 
 const API = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const BASE_URL = "http://localhost:5173/";
 
 const MapApi = () => {
-	const {params, setQueryParameters } = useQueryParameters();
-	const {copied, copyToClipboard} = useClipboard();
-	const [storedLocation, setStoredLocation] = useLocalStorage("mapLocation",{
+	const { params, setQueryParameters } = useQueryParameters();
+	const { copied, copyToClipboard } = useClipboard();
+	const [storedLocation, setStoredLocation] = useLocalStorage("mapLocation", {
 		lat: 9.8990415,
-		lng: -84.1556396
+		lng: -84.1556396,
 	});
 	const [map, setMap] = useState();
 	const [name, setName] = useState("");
 	const [nextId, setNextId] = useState(0);
 	const [pageTitle, setPageTitle] = useState("My map!!!");
-	const [latitude, setLatitude] = useState(Number.parseFloat(params.get("latitude")) || storedLocation.lat);
-	const [longitude, setLongitude] = useState(Number.parseFloat(params.get("longitude")) || storedLocation.lng);
+	const [latitude, setLatitude] = useState(
+		Number.parseFloat(params.get("latitude")) || storedLocation.lat,
+	);
+	const [longitude, setLongitude] = useState(
+		Number.parseFloat(params.get("longitude")) || storedLocation.lng,
+	);
 	const [infoWindow, setInfoWindow] = useState(null);
 	const [isLoading, setLoading] = useState(false);
 	const [markers, setMarkers] = useState([]);
@@ -77,9 +82,9 @@ const MapApi = () => {
 			// The map starts at Costa Rica
 			const newMap = new Map(document.getElementById("map-container"), {
 				zoom: 8,
-				center: {lat: latitude, lng: longitude,},
+				center: { lat: latitude, lng: longitude },
 				mapId: "app",
-			})
+			});
 			const newInfoWindow = new window.google.maps.InfoWindow();
 			const placeName = await getLocationName(latitude, longitude);
 			setPageTitle(placeName);
@@ -90,7 +95,7 @@ const MapApi = () => {
 		initMap();
 	}, []);
 
-	useEffect(() =>  {
+	useEffect(() => {
 		if (map && infoWindow) {
 			const handleMapClick = (e) => {
 				const clickedLat = e.latLng.lat();
@@ -98,13 +103,13 @@ const MapApi = () => {
 				setLatitude(clickedLat);
 				setLongitude(clickedLng);
 				setStoredLocation({
-					lat:clickedLat,
-					lng:clickedLng
+					lat: clickedLat,
+					lng: clickedLng,
 				});
 				const fetchName = async () => {
 					const placeName = await getLocationName(clickedLat, clickedLng);
 					setPageTitle(placeName);
-				}
+				};
 				fetchName();
 				setQueryParameters("latitude", clickedLat);
 				setQueryParameters("longitude", clickedLng);
@@ -126,17 +131,19 @@ const MapApi = () => {
 				//Wait for the infowindow to be rendered
 				setTimeout(() => {
 					const copyBtn = document.getElementById("copy-btn");
-					if (copyBtn){
-						copyBtn.addEventListener("click", () => copyToClipboard(locationURL));
+					if (copyBtn) {
+						copyBtn.addEventListener("click", () =>
+							copyToClipboard(locationURL),
+						);
 					}
 				}, 100);
 			};
-			map.addListener("click",handleMapClick);
+			map.addListener("click", handleMapClick);
 			return () => {
 				window.google.maps.event.clearListeners(map, "click"); //clear listeners
 			};
-		};
-	},[map, infoWindow]);
+		}
+	}, [map, infoWindow]);
 
 	const getLocationName = async (lat, lng) => {
 		const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API}`;
@@ -167,7 +174,7 @@ const MapApi = () => {
 				id: nextId,
 				map: map,
 				position: pos,
-				title: name
+				title: name,
 			});
 			setNextId(nextId + 1);
 			setMarkers([...markers, marker]);
@@ -193,10 +200,10 @@ const MapApi = () => {
 			navigator.geolocation.getCurrentPosition(async (position) => {
 				setLoading(true);
 				setLatitude(position.coords.latitude);
-				setLongitude(position.coords.longitude)
+				setLongitude(position.coords.longitude);
 				const pos = {
 					lat: position.coords.latitude,
-					lng: position.coords.longitude
+					lng: position.coords.longitude,
 				};
 				map.panTo(pos);
 				map.setZoom(14);
@@ -207,8 +214,8 @@ const MapApi = () => {
 					position: pos,
 					title: name,
 				});
-				const placeName = await getLocationName(pos.lat,pos.lng);
-				
+				const placeName = await getLocationName(pos.lat, pos.lng);
+
 				setPageTitle(placeName);
 				setLoading(false);
 			});
